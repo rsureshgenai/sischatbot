@@ -12,7 +12,7 @@ header {visibility: hidden;}
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------- SESSION ----------------
+# ---------------- SESSION INIT ----------------
 if "role" not in st.session_state:
     st.session_state.role = None
 if "step" not in st.session_state:
@@ -22,19 +22,17 @@ if "job" not in st.session_state:
 if "count" not in st.session_state:
     st.session_state.count = ""
 
-# ---------------- RESET ----------------
+# ---------------- RESET FIX ----------------
 def reset():
-    st.session_state.role = None
-    st.session_state.step = 0
-    st.session_state.job = ""
-    st.session_state.count = ""
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
 
 # ---------------- HEADER ----------------
 st.markdown("## 🌍 SIS AI Assistant")
 st.caption("Hiring & Jobs in Europe")
 
 # ---------------- ROLE SELECT ----------------
-if st.session_state.role is None:
+if st.session_state.get("role") is None:
     col1, col2 = st.columns(2)
 
     if col1.button("🏢 Hire Workers"):
@@ -46,15 +44,14 @@ if st.session_state.role is None:
         st.session_state.step = 1
 
 # ---------------- SELECTED ----------------
-if st.session_state.role:
+if st.session_state.get("role"):
     st.success(f"Selected: {st.session_state.role.capitalize()}")
 
 # =====================================================
 # ================= EMPLOYER FLOW ======================
 # =====================================================
-if st.session_state.role == "employer":
+if st.session_state.get("role") == "employer":
 
-    # STEP 1 - JOB
     if st.session_state.step == 1:
 
         def set_job():
@@ -66,7 +63,6 @@ if st.session_state.role == "employer":
         st.text_input("What workers do you need?", key="job_input", on_change=set_job)
         st.caption("Example: Carpenter, Mason, Driver")
 
-    # STEP 2 - COUNT
     elif st.session_state.step == 2:
 
         def set_count():
@@ -79,7 +75,6 @@ if st.session_state.role == "employer":
         st.markdown(f"👷 Job Role: {st.session_state.job}")
         st.text_input("How many workers?", key="count_input", on_change=set_count)
 
-    # STEP 3 - RESULT
     elif st.session_state.step == 3:
 
         with st.spinner("🤖 Processing..."):
@@ -114,11 +109,12 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
+            st.rerun()   # ✅ FIXED
 
 # =====================================================
 # ================= CANDIDATE FLOW =====================
 # =====================================================
-if st.session_state.role == "candidate":
+if st.session_state.get("role") == "candidate":
 
     COMMON_JOBS = [
         "welder", "carpenter", "plumber", "electrician", "mason",
@@ -133,7 +129,6 @@ if st.session_state.role == "candidate":
                 return job
         return None
 
-    # STEP 1 - JOB INPUT
     if st.session_state.step == 1:
 
         def set_job():
@@ -145,7 +140,6 @@ if st.session_state.role == "candidate":
         st.text_input("Enter job", key="job_input", on_change=set_job)
         st.caption("Try: Welder, Mason, Driver, Farm Worker")
 
-    # STEP 2 - RESULT
     elif st.session_state.step == 2:
 
         with st.spinner("🤖 AI is typing..."):
@@ -159,7 +153,6 @@ if st.session_state.role == "candidate":
             st.warning("⚠️ Not sure about that job")
             st.info("👉 Try: Welder, Mason, Driver, Factory Worker")
 
-        # INDUSTRY MAP
         industry_map = {
             "welder": "construction",
             "carpenter": "construction",
@@ -179,7 +172,6 @@ if st.session_state.role == "candidate":
             if key in job_input:
                 industry = industry_map[key]
 
-        # SALARY MAP
         salary_map = {
             "construction": "€900 – €1200",
             "manufacturing": "€800 – €1100",
@@ -235,3 +227,4 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
+            st.rerun()   # ✅ FIXED
