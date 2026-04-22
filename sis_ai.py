@@ -19,6 +19,21 @@ def reset():
     st.session_state.job = ""
     st.session_state.count = ""
 
+# ---------------- COMMON JOBS ----------------
+COMMON_JOBS = [
+    "welder", "carpenter", "plumber", "electrician",
+    "driver", "cleaner", "factory worker", "farm worker",
+    "helper", "warehouse worker", "kitchen helper",
+    "security guard", "nurse", "caregiver"
+]
+
+def suggest_job(user_input):
+    user_input = user_input.lower()
+    for job in COMMON_JOBS:
+        if user_input in job or job in user_input:
+            return job
+    return None
+
 # ---------------- STYLE ----------------
 st.markdown("""
 <style>
@@ -44,15 +59,13 @@ st.caption("Hiring & Jobs in Europe")
 if st.session_state.role is None:
     col1, col2 = st.columns(2)
 
-    with col1:
-        if st.button("🏢 Hire Workers"):
-            st.session_state.role = "employer"
-            st.session_state.step = 1
+    if col1.button("🏢 Hire Workers"):
+        st.session_state.role = "employer"
+        st.session_state.step = 1
 
-    with col2:
-        if st.button("👷 Get Job"):
-            st.session_state.role = "candidate"
-            st.session_state.step = 1
+    if col2.button("👷 Get Job"):
+        st.session_state.role = "candidate"
+        st.session_state.step = 1
 
 # ---------------- AFTER SELECT ----------------
 if st.session_state.role:
@@ -69,31 +82,28 @@ if st.session_state.role == "employer":
 
     if st.session_state.step == 1:
         st.markdown("👋 Welcome Employer!")
-        st.markdown("What type of workers do you need?")
-        job = st.text_input("Enter job role")
+        job = st.text_input("What workers do you need?")
 
         if job:
             st.session_state.job = job
             st.session_state.step = 2
 
     elif st.session_state.step == 2:
-        st.markdown(f"👷 Job Role: **{st.session_state.job}**")
-        count = st.text_input("How many workers needed?")
+        count = st.text_input("How many workers?")
 
-        if count.isdigit():
-            st.session_state.count = count
-            st.session_state.step = 3
+        if count:
+            if count.isdigit():
+                st.session_state.count = count
+                st.session_state.step = 3
+            else:
+                st.warning("⚠️ Enter valid number (Example: 5, 10)")
 
     elif st.session_state.step == 3:
-        st.markdown("✅ Perfect!")
-
         st.markdown(f"""
 👷 Job Role: {st.session_state.job}  
 🔢 Workers Needed: {st.session_state.count}  
 
-📍 Available Countries: Croatia, Serbia, Bulgaria  
-
-🚀 Our team will contact you shortly.
+📍 Countries: Croatia, Serbia, Bulgaria  
         """)
 
         st.markdown("### 🚀 Contact Our Team")
@@ -102,14 +112,14 @@ if st.session_state.role == "employer":
 <a href="tel:+385993665624" style="
 display:block;width:100%;padding:15px;margin-bottom:10px;
 background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;">
 📞 Call Now
 </a>
 
 <a href="https://wa.me/385993665624?text=Need {st.session_state.count} {st.session_state.job} workers" style="
 display:block;width:100%;padding:15px;
 background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;">
 💬 WhatsApp
 </a>
 """, unsafe_allow_html=True)
@@ -134,77 +144,55 @@ if st.session_state.role == "candidate":
 
         job_input = st.session_state.job.lower().replace("-", " ").strip()
 
-        # -------- INDUSTRY MAP --------
-        industry_map = {
+        suggested = suggest_job(job_input)
 
-            # CONSTRUCTION
+        if suggested:
+            job_input = suggested
+        else:
+            st.warning("⚠️ Not sure about that job")
+
+            st.info("""
+👉 Try:
+Welder | Driver | Factory Worker | Farm Worker | Cleaner
+""")
+
+        # INDUSTRY MAP
+        industry_map = {
             "welder": "construction",
-            "fabricator": "construction",
-            "mason": "construction",
             "carpenter": "construction",
             "plumber": "construction",
             "electrician": "construction",
-            "tile": "construction",
-            "painter": "construction",
-
-            # FACTORY
             "factory worker": "manufacturing",
-            "production worker": "manufacturing",
-            "machine operator": "manufacturing",
-            "packing worker": "manufacturing",
-
-            # AGRICULTURE
             "farm worker": "agriculture",
-            "farm house worker": "agriculture",
-            "fruit picker": "agriculture",
-
-            # LOGISTICS
             "driver": "logistics",
-            "delivery": "logistics",
-            "warehouse": "logistics",
-
-            # HOSPITALITY
             "cleaner": "hospitality",
-            "housekeeping": "hospitality",
-            "kitchen helper": "hospitality",
-
-            # HEALTHCARE
             "nurse": "healthcare",
-            "caregiver": "healthcare",
-
-            # GENERAL
-            "helper": "general",
-            "labour": "general"
+            "helper": "general"
         }
 
         industry = "general"
-
         for key, value in industry_map.items():
             if key in job_input:
                 industry = value
                 break
 
-        # -------- SALARY --------
-        if industry == "construction":
-            salary = "€900 – €1200"
-        elif industry == "manufacturing":
-            salary = "€800 – €1100"
-        elif industry == "agriculture":
-            salary = "€700 – €900"
-        elif industry == "logistics":
-            salary = "€800 – €1100"
-        elif industry == "hospitality":
-            salary = "€700 – €900"
-        elif industry == "healthcare":
-            salary = "€1000 – €1500"
-        else:
-            salary = "€700 – €1200"
+        # SALARY
+        salary_map = {
+            "construction": "€900 – €1200",
+            "manufacturing": "€800 – €1100",
+            "agriculture": "€700 – €900",
+            "logistics": "€800 – €1100",
+            "hospitality": "€700 – €900",
+            "healthcare": "€1000 – €1500",
+            "general": "€700 – €1200"
+        }
 
-        # -------- RESPONSE --------
+        salary = salary_map.get(industry, "€700 – €1200")
+
         st.markdown(f"""
-👍 {st.session_state.job.capitalize()} jobs available!
+👍 {job_input.capitalize()} jobs available!
 
-🏭 Industry: {industry.capitalize()}  
+🏭 Industry: {industry.capitalize()}
 
 📍 Countries:
 Croatia, Serbia, Bulgaria, North Macedonia  
@@ -222,8 +210,6 @@ Croatia, Serbia, Bulgaria, North Macedonia
 • Medical Certificate (optional)  
 
 ⏳ Visa Processing: 30–90 days  
-
-🚀 Next Step: Our team will contact you shortly.
         """)
 
         st.markdown("### 🚀 Apply Now")
@@ -232,14 +218,14 @@ Croatia, Serbia, Bulgaria, North Macedonia
 <a href="tel:+919994562962" style="
 display:block;width:100%;padding:15px;margin-bottom:10px;
 background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;">
 📞 Call Now
 </a>
 
-<a href="https://wa.me/919994562962?text=Interested in {st.session_state.job} job" style="
+<a href="https://wa.me/919994562962?text=Interested in {job_input} job" style="
 display:block;width:100%;padding:15px;
 background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;">
 💬 WhatsApp Apply
 </a>
 """, unsafe_allow_html=True)
