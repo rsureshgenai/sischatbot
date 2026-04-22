@@ -1,6 +1,16 @@
 import streamlit as st
+import time
 
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
+
+# ---------------- HIDE STREAMLIT UI ----------------
+st.markdown("""
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+header {visibility: hidden;}
+</style>
+""", unsafe_allow_html=True)
 
 # ---------------- SESSION ----------------
 if "role" not in st.session_state:
@@ -14,42 +24,8 @@ if "count" not in st.session_state:
 
 # ---------------- RESET ----------------
 def reset():
-    st.session_state.role = None
-    st.session_state.step = 0
-    st.session_state.job = ""
-    st.session_state.count = ""
-
-# ---------------- COMMON JOBS ----------------
-COMMON_JOBS = [
-    "welder", "carpenter", "plumber", "electrician",
-    "driver", "cleaner", "factory worker", "farm worker",
-    "helper", "warehouse worker", "kitchen helper",
-    "security guard", "nurse", "caregiver"
-]
-
-def suggest_job(user_input):
-    user_input = user_input.lower()
-    for job in COMMON_JOBS:
-        if user_input in job or job in user_input:
-            return job
-    return None
-
-# ---------------- STYLE ----------------
-st.markdown("""
-<style>
-body {background:#0b0f1a; color:white;}
-.badge {
-    background:#16a34a;
-    padding:10px;
-    border-radius:10px;
-    margin-bottom:10px;
-}
-a:hover {
-    transform:scale(1.03);
-    opacity:0.95;
-}
-</style>
-""", unsafe_allow_html=True)
+    for key in ["role", "step", "job", "count"]:
+        st.session_state[key] = None if key == "role" else 0 if key == "step" else ""
 
 # ---------------- HEADER ----------------
 st.markdown("## 🌍 SIS AI Assistant")
@@ -62,48 +38,59 @@ if st.session_state.role is None:
     if col1.button("🏢 Hire Workers"):
         st.session_state.role = "employer"
         st.session_state.step = 1
+        st.rerun()
 
     if col2.button("👷 Get Job"):
         st.session_state.role = "candidate"
         st.session_state.step = 1
+        st.rerun()
 
-# ---------------- AFTER SELECT ----------------
+# ---------------- SELECTED ----------------
 if st.session_state.role:
-    st.markdown(f"""
-    <div class="badge">
-    Selected: {st.session_state.role.capitalize()}
-    </div>
-    """, unsafe_allow_html=True)
+    st.success(f"Selected: {st.session_state.role.capitalize()}")
 
-# =========================================================
-# ================= EMPLOYER FLOW ==========================
-# =========================================================
+# =====================================================
+# ================= EMPLOYER FLOW ======================
+# =====================================================
 if st.session_state.role == "employer":
 
     if st.session_state.step == 1:
-        st.markdown("👋 Welcome Employer!")
-        job = st.text_input("What workers do you need?")
 
-        if job:
-            st.session_state.job = job
-            st.session_state.step = 2
+        def set_job():
+            if st.session_state.job_input.strip():
+                st.session_state.job = st.session_state.job_input
+                st.session_state.step = 2
+                st.rerun()
+
+        st.markdown("👋 Welcome Employer!")
+        st.text_input("What workers do you need?", key="job_input", on_change=set_job)
+        st.caption("Example: Carpenter, Driver, Welder")
 
     elif st.session_state.step == 2:
-        count = st.text_input("How many workers?")
 
-        if count:
-            if count.isdigit():
-                st.session_state.count = count
+        def set_count():
+            if st.session_state.count_input.isdigit():
+                st.session_state.count = st.session_state.count_input
                 st.session_state.step = 3
+                st.rerun()
             else:
-                st.warning("⚠️ Enter valid number (Example: 5, 10)")
+                st.warning("Enter valid number")
+
+        st.markdown(f"👷 Job Role: {st.session_state.job}")
+        st.text_input("How many workers?", key="count_input", on_change=set_count)
 
     elif st.session_state.step == 3:
-        st.markdown(f"""
-👷 Job Role: {st.session_state.job}  
-🔢 Workers Needed: {st.session_state.count}  
 
-📍 Countries: Croatia, Serbia, Bulgaria  
+        with st.spinner("🤖 Processing..."):
+            time.sleep(1)
+
+        st.markdown(f"""
+### ✅ Requirement Summary
+
+👷 Job Role: **{st.session_state.job}**  
+🔢 Workers Needed: **{st.session_state.count}**  
+
+📍 Available Countries: Croatia, Serbia, Bulgaria  
         """)
 
         st.markdown("### 🚀 Contact Our Team")
@@ -126,37 +113,51 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
+            st.rerun()
 
-# =========================================================
-# ================= CANDIDATE FLOW =========================
-# =========================================================
+# =====================================================
+# ================= CANDIDATE FLOW =====================
+# =====================================================
 if st.session_state.role == "candidate":
 
-    if st.session_state.step == 1:
-        st.markdown("👍 What job are you looking for?")
-        job = st.text_input("Enter job")
+    COMMON_JOBS = [
+        "welder", "carpenter", "plumber", "electrician",
+        "driver", "cleaner", "factory worker", "farm worker",
+        "helper", "warehouse worker", "kitchen helper",
+        "security guard", "nurse", "caregiver"
+    ]
 
-        if job:
-            st.session_state.job = job
-            st.session_state.step = 2
+    def suggest_job(user_input):
+        for job in COMMON_JOBS:
+            if user_input in job or job in user_input:
+                return job
+        return None
+
+    if st.session_state.step == 1:
+
+        def set_job():
+            if st.session_state.job_input.strip():
+                st.session_state.job = st.session_state.job_input
+                st.session_state.step = 2
+                st.rerun()
+
+        st.markdown("👍 What job are you looking for?")
+        st.text_input("Enter job", key="job_input", on_change=set_job)
+        st.caption("Try: Welder, Driver, Farm Worker")
 
     elif st.session_state.step == 2:
 
-        job_input = st.session_state.job.lower().replace("-", " ").strip()
+        with st.spinner("🤖 AI is typing..."):
+            time.sleep(1)
+
+        job_input = st.session_state.job.lower().strip()
 
         suggested = suggest_job(job_input)
 
-        if suggested:
-            job_input = suggested
-        else:
+        if not suggested:
             st.warning("⚠️ Not sure about that job")
+            st.info("👉 Try: Welder, Driver, Factory Worker, Farm Worker")
 
-            st.info("""
-👉 Try:
-Welder | Driver | Factory Worker | Farm Worker | Cleaner
-""")
-
-        # INDUSTRY MAP
         industry_map = {
             "welder": "construction",
             "carpenter": "construction",
@@ -171,12 +172,10 @@ Welder | Driver | Factory Worker | Farm Worker | Cleaner
         }
 
         industry = "general"
-        for key, value in industry_map.items():
+        for key in industry_map:
             if key in job_input:
-                industry = value
-                break
+                industry = industry_map[key]
 
-        # SALARY
         salary_map = {
             "construction": "€900 – €1200",
             "manufacturing": "€800 – €1100",
@@ -187,12 +186,12 @@ Welder | Driver | Factory Worker | Farm Worker | Cleaner
             "general": "€700 – €1200"
         }
 
-        salary = salary_map.get(industry, "€700 – €1200")
+        salary = salary_map.get(industry)
 
         st.markdown(f"""
-👍 {job_input.capitalize()} jobs available!
+### 👍 {st.session_state.job.capitalize()} Jobs Available
 
-🏭 Industry: {industry.capitalize()}
+🏭 Industry: **{industry.capitalize()}**
 
 📍 Countries:
 Croatia, Serbia, Bulgaria, North Macedonia  
@@ -205,7 +204,7 @@ Croatia, Serbia, Bulgaria, North Macedonia
 • Passport  
 • Education Certificate  
 • Experience Certificate  
-• Trade Certificate (added advantage)  
+• Trade Certificate  
 • PCC (depends on country)  
 • Medical Certificate (optional)  
 
@@ -222,7 +221,7 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 📞 Call Now
 </a>
 
-<a href="https://wa.me/919994562962?text=Interested in {job_input} job" style="
+<a href="https://wa.me/919994562962?text=Interested in {st.session_state.job} job" style="
 display:block;width:100%;padding:15px;
 background:linear-gradient(45deg,#25D366,#128C7E);
 color:white;text-align:center;border-radius:10px;text-decoration:none;">
@@ -232,3 +231,4 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
+            st.rerun()
