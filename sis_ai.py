@@ -24,8 +24,10 @@ if "count" not in st.session_state:
 
 # ---------------- RESET ----------------
 def reset():
-    for key in ["role", "step", "job", "count"]:
-        st.session_state[key] = None if key == "role" else 0 if key == "step" else ""
+    st.session_state.role = None
+    st.session_state.step = 0
+    st.session_state.job = ""
+    st.session_state.count = ""
 
 # ---------------- HEADER ----------------
 st.markdown("## 🌍 SIS AI Assistant")
@@ -38,12 +40,10 @@ if st.session_state.role is None:
     if col1.button("🏢 Hire Workers"):
         st.session_state.role = "employer"
         st.session_state.step = 1
-        st.rerun()
 
     if col2.button("👷 Get Job"):
         st.session_state.role = "candidate"
         st.session_state.step = 1
-        st.rerun()
 
 # ---------------- SELECTED ----------------
 if st.session_state.role:
@@ -54,31 +54,32 @@ if st.session_state.role:
 # =====================================================
 if st.session_state.role == "employer":
 
+    # STEP 1 - JOB
     if st.session_state.step == 1:
 
         def set_job():
             if st.session_state.job_input.strip():
                 st.session_state.job = st.session_state.job_input
                 st.session_state.step = 2
-                st.rerun()
 
         st.markdown("👋 Welcome Employer!")
         st.text_input("What workers do you need?", key="job_input", on_change=set_job)
-        st.caption("Example: Carpenter, Driver, Welder")
+        st.caption("Example: Carpenter, Mason, Driver")
 
+    # STEP 2 - COUNT
     elif st.session_state.step == 2:
 
         def set_count():
             if st.session_state.count_input.isdigit():
                 st.session_state.count = st.session_state.count_input
                 st.session_state.step = 3
-                st.rerun()
             else:
-                st.warning("Enter valid number")
+                st.warning("⚠️ Enter valid number")
 
         st.markdown(f"👷 Job Role: {st.session_state.job}")
         st.text_input("How many workers?", key="count_input", on_change=set_count)
 
+    # STEP 3 - RESULT
     elif st.session_state.step == 3:
 
         with st.spinner("🤖 Processing..."):
@@ -90,7 +91,7 @@ if st.session_state.role == "employer":
 👷 Job Role: **{st.session_state.job}**  
 🔢 Workers Needed: **{st.session_state.count}**  
 
-📍 Available Countries: Croatia, Serbia, Bulgaria  
+📍 Countries: Croatia, Serbia, Bulgaria  
         """)
 
         st.markdown("### 🚀 Contact Our Team")
@@ -113,7 +114,6 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
-            st.rerun()
 
 # =====================================================
 # ================= CANDIDATE FLOW =====================
@@ -121,7 +121,7 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 if st.session_state.role == "candidate":
 
     COMMON_JOBS = [
-        "welder", "carpenter", "plumber", "electrician",
+        "welder", "carpenter", "plumber", "electrician", "mason",
         "driver", "cleaner", "factory worker", "farm worker",
         "helper", "warehouse worker", "kitchen helper",
         "security guard", "nurse", "caregiver"
@@ -133,18 +133,19 @@ if st.session_state.role == "candidate":
                 return job
         return None
 
+    # STEP 1 - JOB INPUT
     if st.session_state.step == 1:
 
         def set_job():
             if st.session_state.job_input.strip():
                 st.session_state.job = st.session_state.job_input
                 st.session_state.step = 2
-                st.rerun()
 
         st.markdown("👍 What job are you looking for?")
         st.text_input("Enter job", key="job_input", on_change=set_job)
-        st.caption("Try: Welder, Driver, Farm Worker")
+        st.caption("Try: Welder, Mason, Driver, Farm Worker")
 
+    # STEP 2 - RESULT
     elif st.session_state.step == 2:
 
         with st.spinner("🤖 AI is typing..."):
@@ -156,13 +157,15 @@ if st.session_state.role == "candidate":
 
         if not suggested:
             st.warning("⚠️ Not sure about that job")
-            st.info("👉 Try: Welder, Driver, Factory Worker, Farm Worker")
+            st.info("👉 Try: Welder, Mason, Driver, Factory Worker")
 
+        # INDUSTRY MAP
         industry_map = {
             "welder": "construction",
             "carpenter": "construction",
             "plumber": "construction",
             "electrician": "construction",
+            "mason": "construction",
             "factory worker": "manufacturing",
             "farm worker": "agriculture",
             "driver": "logistics",
@@ -176,6 +179,7 @@ if st.session_state.role == "candidate":
             if key in job_input:
                 industry = industry_map[key]
 
+        # SALARY MAP
         salary_map = {
             "construction": "€900 – €1200",
             "manufacturing": "€800 – €1100",
@@ -231,4 +235,3 @@ color:white;text-align:center;border-radius:10px;text-decoration:none;">
 
         if st.button("🔄 Start Again"):
             reset()
-            st.rerun()
