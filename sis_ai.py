@@ -22,7 +22,7 @@ if "job" not in st.session_state:
 if "count" not in st.session_state:
     st.session_state.count = ""
 
-# ---------------- RESET FIX ----------------
+# ---------------- RESET ----------------
 def reset():
     for key in list(st.session_state.keys()):
         del st.session_state[key]
@@ -32,7 +32,7 @@ st.markdown("## 🌍 SIS AI Assistant")
 st.caption("Hiring & Jobs in Europe")
 
 # ---------------- ROLE SELECT ----------------
-if st.session_state.get("role") is None:
+if st.session_state.role is None:
     col1, col2 = st.columns(2)
 
     if col1.button("🏢 Hire Workers"):
@@ -43,14 +43,14 @@ if st.session_state.get("role") is None:
         st.session_state.role = "candidate"
         st.session_state.step = 1
 
-# ---------------- SELECTED ----------------
-if st.session_state.get("role"):
+# ---------------- SHOW SELECTED ----------------
+if st.session_state.role:
     st.success(f"Selected: {st.session_state.role.capitalize()}")
 
 # =====================================================
 # ================= EMPLOYER FLOW ======================
 # =====================================================
-if st.session_state.get("role") == "employer":
+if st.session_state.role == "employer":
 
     if st.session_state.step == 1:
 
@@ -61,7 +61,7 @@ if st.session_state.get("role") == "employer":
 
         st.markdown("👋 Welcome Employer!")
         st.text_input("What workers do you need?", key="job_input", on_change=set_job)
-        st.caption("Example: Carpenter, Mason, Driver")
+        st.caption("Example: Carpenter, Mason, Driver, Factory Worker")
 
     elif st.session_state.step == 2:
 
@@ -72,7 +72,7 @@ if st.session_state.get("role") == "employer":
             else:
                 st.warning("⚠️ Enter valid number")
 
-        st.markdown(f"👷 Job Role: {st.session_state.job}")
+        st.markdown(f"👷 Job Role: **{st.session_state.job}**")
         st.text_input("How many workers?", key="count_input", on_change=set_count)
 
     elif st.session_state.step == 3:
@@ -93,28 +93,30 @@ if st.session_state.get("role") == "employer":
 
         st.markdown(f"""
 <a href="tel:+385993665624" style="
-display:block;width:100%;padding:15px;margin-bottom:10px;
-background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;text-align:center;border-radius:10px;text-decoration:none;">
+display:block;width:100%;padding:16px;margin-bottom:12px;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+color:white;text-align:center;border-radius:12px;
+text-decoration:none;font-weight:600;">
 📞 Call Now
 </a>
 
 <a href="https://wa.me/385993665624?text=Need {st.session_state.count} {st.session_state.job} workers" style="
-display:block;width:100%;padding:15px;
-background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;text-align:center;border-radius:10px;text-decoration:none;">
-💬 WhatsApp
+display:block;width:100%;padding:16px;
+background:linear-gradient(135deg,#25D366,#128C7E);
+color:white;text-align:center;border-radius:12px;
+text-decoration:none;font-weight:600;">
+💬 WhatsApp Chat
 </a>
 """, unsafe_allow_html=True)
 
         if st.button("🔄 Start Again"):
             reset()
-            st.rerun()   # ✅ FIXED
+            st.rerun()
 
 # =====================================================
 # ================= CANDIDATE FLOW =====================
 # =====================================================
-if st.session_state.get("role") == "candidate":
+if st.session_state.role == "candidate":
 
     COMMON_JOBS = [
         "welder", "carpenter", "plumber", "electrician", "mason",
@@ -138,7 +140,7 @@ if st.session_state.get("role") == "candidate":
 
         st.markdown("👍 What job are you looking for?")
         st.text_input("Enter job", key="job_input", on_change=set_job)
-        st.caption("Try: Welder, Mason, Driver, Farm Worker")
+        st.caption("Try: Welder, Driver, Factory Worker, Farm Worker")
 
     elif st.session_state.step == 2:
 
@@ -146,7 +148,6 @@ if st.session_state.get("role") == "candidate":
             time.sleep(1)
 
         job_input = st.session_state.job.lower().strip()
-
         suggested = suggest_job(job_input)
 
         if not suggested:
@@ -200,7 +201,7 @@ Croatia, Serbia, Bulgaria, North Macedonia
 • Passport  
 • Education Certificate  
 • Experience Certificate  
-• Trade Certificate  
+• Trade Certificate (added advantage)  
 • PCC (depends on country)  
 • Medical Certificate (optional)  
 
@@ -210,21 +211,23 @@ Croatia, Serbia, Bulgaria, North Macedonia
         st.markdown("### 🚀 Apply Now")
 
         st.markdown(f"""
-<a href="tel:+919994562962" style="
-display:block;width:100%;padding:15px;margin-bottom:10px;
-background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;text-align:center;border-radius:10px;text-decoration:none;">
+<a href="tel:+919384747101" style="
+display:block;width:100%;padding:16px;margin-bottom:12px;
+background:linear-gradient(135deg,#4f46e5,#7c3aed);
+color:white;text-align:center;border-radius:12px;
+text-decoration:none;font-weight:600;">
 📞 Call Now
 </a>
 
-<a href="https://wa.me/919994562962?text=Interested in {st.session_state.job} job" style="
-display:block;width:100%;padding:15px;
-background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;text-align:center;border-radius:10px;text-decoration:none;">
+<a href="https://wa.me/919384747101?text=Hello%20SIS%20Team,%20I%20am%20interested%20in%20{st.session_state.job}%20job" style="
+display:block;width:100%;padding:16px;
+background:linear-gradient(135deg,#25D366,#128C7E);
+color:white;text-align:center;border-radius:12px;
+text-decoration:none;font-weight:600;">
 💬 WhatsApp Apply
 </a>
 """, unsafe_allow_html=True)
 
         if st.button("🔄 Start Again"):
             reset()
-            st.rerun()   # ✅ FIXED
+            st.rerun()
