@@ -1,32 +1,46 @@
 import streamlit as st
 
-# PAGE CONFIG
+# ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
 
-# ---------- CSS FIX (CENTER + RESPONSIVE) ----------
+# ---------- CSS (FINAL CLEAN UI) ----------
 st.markdown("""
 <style>
 
-/* Remove extra top space */
+/* Center container */
 .block-container {
-    padding-top: 1.5rem !important;
     max-width: 700px;
     margin: auto;
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
 }
 
-/* Center content */
-.main {
+/* Center everything nicely */
+[data-testid="stAppViewContainer"] {
     display: flex;
     justify-content: center;
-    align-items: center;
-    min-height: 90vh;
 }
 
-/* Buttons */
-.stButton button {
+[data-testid="stAppViewContainer"] > .main {
+    width: 100%;
+    max-width: 700px;
+}
+
+/* Title center */
+h2 {
+    text-align: center;
+}
+
+/* Buttons center */
+.stButton {
+    display: flex;
+    justify-content: center;
+}
+
+/* Input styling */
+.stTextInput input {
     border-radius: 12px;
-    padding: 10px 18px;
-    font-weight: 500;
+    padding: 10px;
 }
 
 /* Chat bubble */
@@ -36,12 +50,20 @@ st.markdown("""
     border-radius: 14px;
     margin-top: 15px;
     color: black;
+    line-height: 1.6;
 }
 
-/* Mobile */
+/* Footer */
+footer {
+    text-align: center;
+}
+
+/* Mobile responsive */
 @media (max-width: 768px) {
     .block-container {
-        padding: 1rem !important;
+        padding-top: 2rem !important;
+        padding-left: 1rem;
+        padding-right: 1rem;
     }
 }
 
@@ -68,19 +90,19 @@ with col2:
     if st.button("👨‍💼 Get Job"):
         st.session_state.role = "candidate"
 
-# SHOW SELECTED
+# ---------- SHOW ROLE ----------
 if st.session_state.role:
     st.success(f"Selected: {st.session_state.role.capitalize()}")
 
 # ---------- INPUT ----------
 user_input = st.text_input("Type your answer...")
 
-# ---------- RESPONSE LOGIC ----------
+# ---------- CHAT LOGIC ----------
 if user_input:
 
     user_input = user_input.lower()
 
-    # ---------------- CANDIDATE FLOW ----------------
+    # ================== CANDIDATE ==================
     if st.session_state.role == "candidate":
 
         if "job" in user_input:
@@ -88,7 +110,7 @@ if user_input:
 <div class="chat-box">
 <b>Awesome 🌍</b><br><br>
 
-<b>Top jobs:</b><br>
+<b>Available Jobs:</b><br>
 • Hospitality<br>
 • Nursing / Caregiver<br>
 • Construction<br>
@@ -106,7 +128,7 @@ Croatia, Serbia, Bulgaria, North Macedonia & more<br><br>
 Unskilled: €700 – €900<br>
 Skilled: €1000 – €1200<br><br>
 
-👉 Which job are you looking for?
+👉 Which job are you interested in?
 </div>
 """, unsafe_allow_html=True)
 
@@ -120,12 +142,12 @@ Serbia: 45–60 days<br>
 Bulgaria: 60–90 days<br>
 North Macedonia: 30–45 days<br><br>
 
-👉 Required Documents:<br>
+📑 <b>Documents Required:</b><br>
 • CV<br>
 • Passport<br>
 • Education Certificate<br>
 • Experience Certificate<br>
-• PCC (if required)<br>
+• PCC (depends on country)<br>
 • Medical (optional)
 </div>
 """, unsafe_allow_html=True)
@@ -134,11 +156,12 @@ North Macedonia: 30–45 days<br><br>
             st.markdown("""
 <div class="chat-box">
 🚀 <b>Next Step:</b><br><br>
-Please contact our team to start your application process.
+Our team will guide you through the complete process.<br>
+Please connect with us to start your application.
 </div>
 """, unsafe_allow_html=True)
 
-    # ---------------- EMPLOYER FLOW ----------------
+    # ================== EMPLOYER ==================
     elif st.session_state.role == "employer":
 
         if "worker" in user_input or "hire" in user_input:
@@ -156,7 +179,7 @@ Please contact our team to start your application process.
 • Retail<br>
 • Security<br><br>
 
-📍 Countries:<br>
+📍 <b>Countries:</b><br>
 Croatia, Serbia, Bulgaria<br><br>
 
 👉 How many workers do you need?
@@ -166,15 +189,18 @@ Croatia, Serbia, Bulgaria<br><br>
         elif user_input.isdigit():
             st.markdown(f"""
 <div class="chat-box">
-👍 Great! You need <b>{user_input}</b> workers.<br><br>
-Our team will assist you with hiring and documentation process.
+👍 <b>Great!</b><br><br>
+
+You need <b>{user_input}</b> workers.<br>
+Our team will assist you with hiring, documentation & deployment.
 </div>
 """, unsafe_allow_html=True)
 
         else:
             st.markdown("""
 <div class="chat-box">
-📩 Please share your requirement (industry, number of workers).
+📩 Please share your requirement:<br>
+Industry + Number of workers needed
 </div>
 """, unsafe_allow_html=True)
 
