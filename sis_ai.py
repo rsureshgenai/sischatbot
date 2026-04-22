@@ -3,67 +3,54 @@ import streamlit as st
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
 
-# ---------- CSS (FINAL CLEAN UI) ----------
+# ---------- CSS ----------
 st.markdown("""
 <style>
 
-/* Center container */
+/* Container */
 .block-container {
     max-width: 700px;
     margin: auto;
-    padding-top: 4rem !important;
-    padding-bottom: 4rem !important;
+    padding-top: 3rem !important;
 }
 
-/* Center everything nicely */
-[data-testid="stAppViewContainer"] {
-    display: flex;
-    justify-content: center;
+/* Title animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
 }
 
-[data-testid="stAppViewContainer"] > .main {
-    width: 100%;
-    max-width: 700px;
+.title-emoji {
+    display:inline-block;
+    animation: float 2s infinite;
 }
 
-/* Title center */
-h2 {
-    text-align: center;
-}
-
-/* Buttons center */
-.stButton {
-    display: flex;
-    justify-content: center;
-}
-
-/* Input styling */
-.stTextInput input {
-    border-radius: 12px;
-    padding: 10px;
-}
-
-/* Chat bubble */
+/* Chat box */
 .chat-box {
     background-color: #F2DDE3;
     padding: 16px;
     border-radius: 14px;
     margin-top: 15px;
     color: black;
-    line-height: 1.6;
+    animation: fadeIn 0.4s ease-in-out;
 }
 
-/* Footer */
-footer {
-    text-align: center;
+@keyframes fadeIn {
+    from {opacity:0; transform: translateY(10px);}
+    to {opacity:1; transform: translateY(0);}
 }
 
-/* Mobile responsive */
+/* Input */
+.stTextInput input {
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* Mobile */
 @media (max-width: 768px) {
     .block-container {
-        padding-top: 2rem !important;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding: 1rem !important;
     }
 }
 
@@ -71,8 +58,13 @@ footer {
 """, unsafe_allow_html=True)
 
 # ---------- TITLE ----------
-st.markdown("## 🌍 SIS AI Assistant")
-st.caption("Hiring & Jobs in Europe")
+st.markdown("""
+<h2 style='text-align:center; font-size:28px;'>
+<span class='title-emoji'>🌍</span> SIS AI Assistant
+</h2>
+<p style='text-align:center; color:gray;'>Hiring & Jobs in Europe</p>
+""", unsafe_allow_html=True)
+
 st.markdown("---")
 
 # ---------- SESSION ----------
@@ -80,19 +72,45 @@ if "role" not in st.session_state:
     st.session_state.role = None
 
 # ---------- ROLE SELECTION ----------
-col1, col2 = st.columns(2)
+if st.session_state.role is None:
 
-with col1:
-    if st.button("🏢 Hire Workers"):
-        st.session_state.role = "employer"
+    col1, col2, col3 = st.columns([1,2,1])
 
-with col2:
-    if st.button("👨‍💼 Get Job"):
-        st.session_state.role = "candidate"
+    with col2:
+        c1, c2 = st.columns(2)
 
-# ---------- SHOW ROLE ----------
-if st.session_state.role:
-    st.success(f"Selected: {st.session_state.role.capitalize()}")
+        with c1:
+            if st.button("🏢 Hire Workers"):
+                st.session_state.role = "employer"
+
+        with c2:
+            if st.button("👨‍💼 Get Job"):
+                st.session_state.role = "candidate"
+
+# ---------- AFTER SELECTION ----------
+if st.session_state.role == "employer":
+
+    st.success("Selected: Employer")
+
+    st.markdown("""
+<div class="chat-box">
+👋 Welcome Employer!<br><br>
+We help you hire skilled workers across Europe.<br><br>
+👉 What type of workers do you need?
+</div>
+""", unsafe_allow_html=True)
+
+elif st.session_state.role == "candidate":
+
+    st.success("Selected: Candidate")
+
+    st.markdown("""
+<div class="chat-box">
+👋 Welcome!<br><br>
+We help candidates get jobs in Europe.<br><br>
+👉 What job are you looking for?
+</div>
+""", unsafe_allow_html=True)
 
 # ---------- INPUT ----------
 user_input = st.text_input("Type your answer...")
@@ -105,12 +123,11 @@ if user_input:
     # ================== CANDIDATE ==================
     if st.session_state.role == "candidate":
 
-        if "job" in user_input:
+        if "job" in user_input or "work" in user_input:
             st.markdown("""
 <div class="chat-box">
-<b>Awesome 🌍</b><br><br>
+🌍 <b>Available Jobs:</b><br><br>
 
-<b>Available Jobs:</b><br>
 • Hospitality<br>
 • Nursing / Caregiver<br>
 • Construction<br>
@@ -121,10 +138,7 @@ if user_input:
 • Retail Staff<br>
 • Security Guard<br><br>
 
-📍 <b>Countries:</b><br>
-Croatia, Serbia, Bulgaria, North Macedonia & more<br><br>
-
-💰 <b>Salary:</b><br>
+💰 Salary:<br>
 Unskilled: €700 – €900<br>
 Skilled: €1000 – €1200<br><br>
 
@@ -142,22 +156,17 @@ Serbia: 45–60 days<br>
 Bulgaria: 60–90 days<br>
 North Macedonia: 30–45 days<br><br>
 
-📑 <b>Documents Required:</b><br>
-• CV<br>
-• Passport<br>
-• Education Certificate<br>
-• Experience Certificate<br>
-• PCC (depends on country)<br>
-• Medical (optional)
+📑 Documents:<br>
+CV, Passport, Education, Experience,<br>
+PCC (if required), Medical (optional)
 </div>
 """, unsafe_allow_html=True)
 
         else:
             st.markdown("""
 <div class="chat-box">
-🚀 <b>Next Step:</b><br><br>
-Our team will guide you through the complete process.<br>
-Please connect with us to start your application.
+🚀 Our team will guide you step-by-step.<br>
+Please contact us to proceed further.
 </div>
 """, unsafe_allow_html=True)
 
@@ -167,20 +176,16 @@ Please connect with us to start your application.
         if "worker" in user_input or "hire" in user_input:
             st.markdown("""
 <div class="chat-box">
-🏢 <b>We provide manpower for:</b><br><br>
+🏢 <b>Industries we serve:</b><br><br>
 
 • Hospitality<br>
 • Nursing<br>
 • Construction<br>
 • Factory / Warehouse<br>
 • Housekeeping<br>
-• Farm Workers<br>
 • Drivers<br>
 • Retail<br>
 • Security<br><br>
-
-📍 <b>Countries:</b><br>
-Croatia, Serbia, Bulgaria<br><br>
 
 👉 How many workers do you need?
 </div>
@@ -189,21 +194,24 @@ Croatia, Serbia, Bulgaria<br><br>
         elif user_input.isdigit():
             st.markdown(f"""
 <div class="chat-box">
-👍 <b>Great!</b><br><br>
-
-You need <b>{user_input}</b> workers.<br>
-Our team will assist you with hiring, documentation & deployment.
+👍 Great! You need <b>{user_input}</b> workers.<br><br>
+We will assist you with hiring & documentation.
 </div>
 """, unsafe_allow_html=True)
 
         else:
             st.markdown("""
 <div class="chat-box">
-📩 Please share your requirement:<br>
-Industry + Number of workers needed
+📩 Please share your requirement (industry + number).
 </div>
 """, unsafe_allow_html=True)
 
+# ---------- RESET ----------
+if st.session_state.role:
+    if st.button("🔄 Start Over"):
+        st.session_state.role = None
+        st.rerun()
+
 # ---------- FOOTER ----------
-st.markdown("<br><br>", unsafe_allow_html=True)
+st.markdown("<br>", unsafe_allow_html=True)
 st.caption("⚡ SIS AI • Powered by SIS International Recruiters")
