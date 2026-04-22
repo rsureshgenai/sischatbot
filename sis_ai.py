@@ -1,5 +1,4 @@
 import streamlit as st
-import time
 
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
 
@@ -13,36 +12,22 @@ if "job" not in st.session_state:
 if "count" not in st.session_state:
     st.session_state.count = ""
 
+# ---------------- RESET ----------------
+def reset():
+    st.session_state.role = None
+    st.session_state.step = 0
+    st.session_state.job = ""
+    st.session_state.count = ""
+
 # ---------------- STYLE ----------------
 st.markdown("""
 <style>
 body {background:#0b0f1a; color:white;}
-
-.chat-box {
-    background:#111827;
-    padding:15px;
-    border-radius:12px;
-    margin-bottom:10px;
-}
-
-.bot {
-    background:#1f2937;
-}
-
-.user {
-    background:#374151;
-    text-align:right;
-}
-
 .badge {
     background:#16a34a;
     padding:10px;
     border-radius:10px;
     margin-bottom:10px;
-}
-
-a {
-    transition:0.3s;
 }
 a:hover {
     transform:scale(1.03);
@@ -54,13 +39,6 @@ a:hover {
 # ---------------- HEADER ----------------
 st.markdown("## 🌍 SIS AI Assistant")
 st.caption("Hiring & Jobs in Europe")
-
-# ---------------- RESET ----------------
-def reset():
-    st.session_state.role = None
-    st.session_state.step = 0
-    st.session_state.job = ""
-    st.session_state.count = ""
 
 # ---------------- ROLE SELECT ----------------
 if st.session_state.role is None:
@@ -78,20 +56,20 @@ if st.session_state.role is None:
 
 # ---------------- AFTER SELECT ----------------
 if st.session_state.role:
-
     st.markdown(f"""
     <div class="badge">
     Selected: {st.session_state.role.capitalize()}
     </div>
     """, unsafe_allow_html=True)
 
-# ---------------- EMPLOYER FLOW ----------------
+# =========================================================
+# ================= EMPLOYER FLOW ==========================
+# =========================================================
 if st.session_state.role == "employer":
 
     if st.session_state.step == 1:
         st.markdown("👋 Welcome Employer!")
         st.markdown("What type of workers do you need?")
-
         job = st.text_input("Enter job role")
 
         if job:
@@ -107,7 +85,6 @@ if st.session_state.role == "employer":
             st.session_state.step = 3
 
     elif st.session_state.step == 3:
-
         st.markdown("✅ Perfect!")
 
         st.markdown(f"""
@@ -119,34 +96,20 @@ if st.session_state.role == "employer":
 🚀 Our team will contact you shortly.
         """)
 
-        # PREMIUM BUTTONS
         st.markdown("### 🚀 Contact Our Team")
 
         st.markdown(f"""
 <a href="tel:+385993665624" style="
-display:block;
-width:100%;
-padding:15px;
-margin-bottom:10px;
+display:block;width:100%;padding:15px;margin-bottom:10px;
 background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
 📞 Call Now
 </a>
 
 <a href="https://wa.me/385993665624?text=Need {st.session_state.count} {st.session_state.job} workers" style="
-display:block;
-width:100%;
-padding:15px;
+display:block;width:100%;padding:15px;
 background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
 💬 WhatsApp
 </a>
 """, unsafe_allow_html=True)
@@ -154,7 +117,9 @@ font-weight:bold;">
         if st.button("🔄 Start Again"):
             reset()
 
-# ---------------- CANDIDATE FLOW ----------------
+# =========================================================
+# ================= CANDIDATE FLOW =========================
+# =========================================================
 if st.session_state.role == "candidate":
 
     if st.session_state.step == 1:
@@ -167,14 +132,85 @@ if st.session_state.role == "candidate":
 
     elif st.session_state.step == 2:
 
-        st.markdown(f"""
-👍 {st.session_state.job} jobs available!
+        job_input = st.session_state.job.lower().replace("-", " ").strip()
 
-📍 Countries: Croatia, Serbia, Bulgaria, North Macedonia  
+        # -------- INDUSTRY MAP --------
+        industry_map = {
+
+            # CONSTRUCTION
+            "welder": "construction",
+            "fabricator": "construction",
+            "mason": "construction",
+            "carpenter": "construction",
+            "plumber": "construction",
+            "electrician": "construction",
+            "tile": "construction",
+            "painter": "construction",
+
+            # FACTORY
+            "factory worker": "manufacturing",
+            "production worker": "manufacturing",
+            "machine operator": "manufacturing",
+            "packing worker": "manufacturing",
+
+            # AGRICULTURE
+            "farm worker": "agriculture",
+            "farm house worker": "agriculture",
+            "fruit picker": "agriculture",
+
+            # LOGISTICS
+            "driver": "logistics",
+            "delivery": "logistics",
+            "warehouse": "logistics",
+
+            # HOSPITALITY
+            "cleaner": "hospitality",
+            "housekeeping": "hospitality",
+            "kitchen helper": "hospitality",
+
+            # HEALTHCARE
+            "nurse": "healthcare",
+            "caregiver": "healthcare",
+
+            # GENERAL
+            "helper": "general",
+            "labour": "general"
+        }
+
+        industry = "general"
+
+        for key, value in industry_map.items():
+            if key in job_input:
+                industry = value
+                break
+
+        # -------- SALARY --------
+        if industry == "construction":
+            salary = "€900 – €1200"
+        elif industry == "manufacturing":
+            salary = "€800 – €1100"
+        elif industry == "agriculture":
+            salary = "€700 – €900"
+        elif industry == "logistics":
+            salary = "€800 – €1100"
+        elif industry == "hospitality":
+            salary = "€700 – €900"
+        elif industry == "healthcare":
+            salary = "€1000 – €1500"
+        else:
+            salary = "€700 – €1200"
+
+        # -------- RESPONSE --------
+        st.markdown(f"""
+👍 {st.session_state.job.capitalize()} jobs available!
+
+🏭 Industry: {industry.capitalize()}  
+
+📍 Countries:
+Croatia, Serbia, Bulgaria, North Macedonia  
 
 💰 Salary:
-• Unskilled: €700 – €900  
-• Skilled: €1000 – €1200  
+{salary}
 
 📋 Required Documents:
 • CV (with education details)  
@@ -186,36 +222,24 @@ if st.session_state.role == "candidate":
 • Medical Certificate (optional)  
 
 ⏳ Visa Processing: 30–90 days  
+
+🚀 Next Step: Our team will contact you shortly.
         """)
 
-        # PREMIUM BUTTONS
         st.markdown("### 🚀 Apply Now")
 
         st.markdown(f"""
 <a href="tel:+919994562962" style="
-display:block;
-width:100%;
-padding:15px;
-margin-bottom:10px;
+display:block;width:100%;padding:15px;margin-bottom:10px;
 background:linear-gradient(45deg,#4f46e5,#6a5cff);
-color:white;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
 📞 Call Now
 </a>
 
 <a href="https://wa.me/919994562962?text=Interested in {st.session_state.job} job" style="
-display:block;
-width:100%;
-padding:15px;
+display:block;width:100%;padding:15px;
 background:linear-gradient(45deg,#25D366,#128C7E);
-color:white;
-text-align:center;
-border-radius:10px;
-text-decoration:none;
-font-weight:bold;">
+color:white;text-align:center;border-radius:10px;text-decoration:none;font-weight:bold;">
 💬 WhatsApp Apply
 </a>
 """, unsafe_allow_html=True)
