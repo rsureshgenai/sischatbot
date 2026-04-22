@@ -1,217 +1,143 @@
 import streamlit as st
 
-# ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
 
-# ---------- CSS ----------
-st.markdown("""
-<style>
-
-/* Container */
-.block-container {
-    max-width: 700px;
-    margin: auto;
-    padding-top: 3rem !important;
-}
-
-/* Title animation */
-@keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-5px); }
-    100% { transform: translateY(0px); }
-}
-
-.title-emoji {
-    display:inline-block;
-    animation: float 2s infinite;
-}
-
-/* Chat box */
-.chat-box {
-    background-color: #F2DDE3;
-    padding: 16px;
-    border-radius: 14px;
-    margin-top: 15px;
-    color: black;
-    animation: fadeIn 0.4s ease-in-out;
-}
-
-@keyframes fadeIn {
-    from {opacity:0; transform: translateY(10px);}
-    to {opacity:1; transform: translateY(0);}
-}
-
-/* Input */
-.stTextInput input {
-    border-radius: 12px;
-    padding: 10px;
-}
-
-/* Mobile */
-@media (max-width: 768px) {
-    .block-container {
-        padding: 1rem !important;
-    }
-}
-
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- TITLE ----------
-st.markdown("""
-<h2 style='text-align:center; font-size:28px;'>
-<span class='title-emoji'>🌍</span> SIS AI Assistant
-</h2>
-<p style='text-align:center; color:gray;'>Hiring & Jobs in Europe</p>
-""", unsafe_allow_html=True)
-
-st.markdown("---")
-
-# ---------- SESSION ----------
+# ======================
+# SESSION STATE
+# ======================
 if "role" not in st.session_state:
     st.session_state.role = None
 
-# ---------- ROLE SELECTION ----------
+if "step" not in st.session_state:
+    st.session_state.step = 0
+
+# ======================
+# HEADER
+# ======================
+st.markdown("## 🌍 SIS AI Assistant")
+st.caption("Hiring & Jobs in Europe")
+
+# ======================
+# ROLE SELECTION
+# ======================
 if st.session_state.role is None:
 
-    col1, col2, col3 = st.columns([1,2,1])
+    col1, col2 = st.columns(2)
 
-    with col2:
-        c1, c2 = st.columns(2)
+    if col1.button("🏢 Hire Workers"):
+        st.session_state.role = "employer"
+        st.session_state.step = 1
 
-        with c1:
-            if st.button("🏢 Hire Workers"):
-                st.session_state.role = "employer"
+    if col2.button("🧑 Get Job"):
+        st.session_state.role = "candidate"
+        st.session_state.step = 1
 
-        with c2:
-            if st.button("👨‍💼 Get Job"):
-                st.session_state.role = "candidate"
-
-# ---------- AFTER SELECTION ----------
+# ======================
+# EMPLOYER FLOW
+# ======================
 if st.session_state.role == "employer":
 
     st.success("Selected: Employer")
 
-    st.markdown("""
-<div class="chat-box">
-👋 Welcome Employer!<br><br>
-We help you hire skilled workers across Europe.<br><br>
-👉 What type of workers do you need?
-</div>
-""", unsafe_allow_html=True)
+    # STEP 1
+    if st.session_state.step == 1:
+        st.markdown("""
+        👋 Welcome Employer!
 
+        What type of workers do you need?
+        (Example: Carpenter, Mason, Driver)
+        """)
+
+        job = st.text_input("Your answer")
+
+        if job:
+            st.session_state.job = job
+            st.session_state.step = 2
+            st.rerun()
+
+    # STEP 2
+    elif st.session_state.step == 2:
+        st.markdown(f"""
+        👍 Great! You need **{st.session_state.job.title()} workers**
+
+        How many workers do you need?
+        """)
+
+        count = st.text_input("Enter number")
+
+        if count.isdigit():
+            st.session_state.count = count
+            st.session_state.step = 3
+            st.rerun()
+
+    # STEP 3
+    elif st.session_state.step == 3:
+        st.markdown(f"""
+        ✅ Perfect!
+
+        👷 Job Role: {st.session_state.job.title()}  
+        🔢 Workers Needed: {st.session_state.count}  
+
+        📍 Available Countries:
+        Croatia, Serbia, Bulgaria  
+
+        🚀 Next Step:
+        Our team will contact you shortly.
+        """)
+
+# ======================
+# CANDIDATE FLOW
+# ======================
 elif st.session_state.role == "candidate":
 
     st.success("Selected: Candidate")
 
-    st.markdown("""
-<div class="chat-box">
-👋 Welcome!<br><br>
-We help candidates get jobs in Europe.<br><br>
-👉 What job are you looking for?
-</div>
-""", unsafe_allow_html=True)
+    # STEP 1
+    if st.session_state.step == 1:
+        st.markdown("""
+        👋 Welcome Candidate!
 
-# ---------- INPUT ----------
-user_input = st.text_input("Type your answer...")
+        What job are you looking for?
+        (Example: Driver, Helper, Cleaner)
+        """)
 
-# ---------- CHAT LOGIC ----------
-if user_input:
+        job = st.text_input("Your answer")
 
-    user_input = user_input.lower()
+        if job:
+            st.session_state.job = job
+            st.session_state.step = 2
+            st.rerun()
 
-    # ================== CANDIDATE ==================
-    if st.session_state.role == "candidate":
+    # STEP 2
+    elif st.session_state.step == 2:
+        st.markdown(f"""
+        👍 {st.session_state.job.title()} jobs available!
 
-        if "job" in user_input or "work" in user_input:
-            st.markdown("""
-<div class="chat-box">
-🌍 <b>Available Jobs:</b><br><br>
+        📍 Countries:
+        Croatia, Serbia, Bulgaria, North Macedonia  
 
-• Hospitality<br>
-• Nursing / Caregiver<br>
-• Construction<br>
-• Factory / Warehouse<br>
-• Housekeeping<br>
-• Farm Worker<br>
-• Driver Jobs<br>
-• Retail Staff<br>
-• Security Guard<br><br>
+        💰 Salary:
+        • Unskilled: €700 – €900  
+        • Skilled: €1000 – €1200  
 
-💰 Salary:<br>
-Unskilled: €700 – €900<br>
-Skilled: €1000 – €1200<br><br>
+        📋 Required Documents:
+        • CV  
+        • Passport  
+        • Experience Certificate  
+        • PCC (if required)  
 
-👉 Which job are you interested in?
-</div>
-""", unsafe_allow_html=True)
+        ⏳ Visa Processing:
+        30–90 days (depends on country)
 
-        elif "visa" in user_input:
-            st.markdown("""
-<div class="chat-box">
-📄 <b>Visa Process:</b><br><br>
+        🚀 Next Step:
+        Our team will contact you shortly.
+        """)
 
-Croatia: 60–90 days<br>
-Serbia: 45–60 days<br>
-Bulgaria: 60–90 days<br>
-North Macedonia: 30–45 days<br><br>
-
-📑 Documents:<br>
-CV, Passport, Education, Experience,<br>
-PCC (if required), Medical (optional)
-</div>
-""", unsafe_allow_html=True)
-
-        else:
-            st.markdown("""
-<div class="chat-box">
-🚀 Our team will guide you step-by-step.<br>
-Please contact us to proceed further.
-</div>
-""", unsafe_allow_html=True)
-
-    # ================== EMPLOYER ==================
-    elif st.session_state.role == "employer":
-
-        if "worker" in user_input or "hire" in user_input:
-            st.markdown("""
-<div class="chat-box">
-🏢 <b>Industries we serve:</b><br><br>
-
-• Hospitality<br>
-• Nursing<br>
-• Construction<br>
-• Factory / Warehouse<br>
-• Housekeeping<br>
-• Drivers<br>
-• Retail<br>
-• Security<br><br>
-
-👉 How many workers do you need?
-</div>
-""", unsafe_allow_html=True)
-
-        elif user_input.isdigit():
-            st.markdown(f"""
-<div class="chat-box">
-👍 Great! You need <b>{user_input}</b> workers.<br><br>
-We will assist you with hiring & documentation.
-</div>
-""", unsafe_allow_html=True)
-
-        else:
-            st.markdown("""
-<div class="chat-box">
-📩 Please share your requirement (industry + number).
-</div>
-""", unsafe_allow_html=True)
-
-# ---------- RESET ----------
-if st.session_state.role:
-    if st.button("🔄 Start Over"):
-        st.session_state.role = None
-        st.rerun()
-
-# ---------- FOOTER ----------
-st.markdown("<br>", unsafe_allow_html=True)
-st.caption("⚡ SIS AI • Powered by SIS International Recruiters")
+# ======================
+# RESET BUTTON
+# ======================
+st.markdown("---")
+if st.button("🔄 Start Again"):
+    st.session_state.role = None
+    st.session_state.step = 0
+    st.rerun()
