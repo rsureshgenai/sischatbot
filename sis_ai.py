@@ -1,9 +1,60 @@
 import streamlit as st
+import time
 
 st.set_page_config(page_title="SIS AI Assistant", layout="centered")
 
 # ======================
-# SESSION STATE
+# CUSTOM CSS (PREMIUM UI)
+# ======================
+st.markdown("""
+<style>
+
+/* Typing animation */
+.typing {
+  font-style: italic;
+  opacity: 0.7;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0% {opacity: 0.3;}
+  50% {opacity: 1;}
+  100% {opacity: 0.3;}
+}
+
+/* Buttons */
+.stLinkButton > a {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    border-radius: 14px;
+    font-weight: 600;
+    text-align: center;
+    text-decoration: none;
+}
+
+/* Call */
+.call-btn a {
+    background: linear-gradient(45deg, #4f46e5, #6a5cff);
+    color: white !important;
+}
+
+/* WhatsApp */
+.whatsapp-btn a {
+    background: linear-gradient(45deg, #25D366, #128C7E);
+    color: white !important;
+}
+
+/* Hover */
+.stLinkButton > a:hover {
+    transform: translateY(-2px);
+}
+
+</style>
+""", unsafe_allow_html=True)
+
+# ======================
+# SESSION
 # ======================
 if "role" not in st.session_state:
     st.session_state.role = None
@@ -30,17 +81,15 @@ if st.session_state.role is None:
 
     col1, col2 = st.columns(2)
 
-    with col1:
-        if st.button("🏢 Hire Workers"):
-            st.session_state.role = "employer"
-            st.session_state.step = 1
-            st.rerun()
+    if col1.button("🏢 Hire Workers"):
+        st.session_state.role = "employer"
+        st.session_state.step = 1
+        st.rerun()
 
-    with col2:
-        if st.button("🧑 Get Job"):
-            st.session_state.role = "candidate"
-            st.session_state.step = 1
-            st.rerun()
+    if col2.button("🧑 Get Job"):
+        st.session_state.role = "candidate"
+        st.session_state.step = 1
+        st.rerun()
 
 # ======================
 # EMPLOYER FLOW
@@ -49,14 +98,10 @@ elif st.session_state.role == "employer":
 
     st.success("Selected: Employer")
 
-    # STEP 1 → Job role
+    # STEP 1
     if st.session_state.step == 1:
-        st.markdown("""
-        👋 Welcome Employer!
-
-        What type of workers do you need?
-        (Example: Carpenter, Mason, Driver)
-        """)
+        st.markdown("👋 Welcome Employer!")
+        st.markdown("What type of workers do you need?")
 
         job = st.text_input("Your answer", key="emp_job")
 
@@ -65,23 +110,27 @@ elif st.session_state.role == "employer":
             st.session_state.step = 2
             st.rerun()
 
-    # STEP 2 → Count
+    # STEP 2
     elif st.session_state.step == 2:
-        st.markdown(f"""
-        👍 Great! You need **{st.session_state.job.title()} workers**
+        st.markdown(f"👍 You need **{st.session_state.job.title()} workers**")
 
-        How many workers do you need?
-        """)
-
-        count = st.text_input("Enter number", key="emp_count")
+        count = st.text_input("How many workers?", key="emp_count")
 
         if count.isdigit():
             st.session_state.count = count
             st.session_state.step = 3
             st.rerun()
 
-    # STEP 3 → Final
+    # STEP 3 (WITH TYPING EFFECT)
     elif st.session_state.step == 3:
+
+        placeholder = st.empty()
+        placeholder.markdown('<div class="typing">🤖 AI is typing...</div>', unsafe_allow_html=True)
+
+        time.sleep(1.2)
+
+        placeholder.empty()
+
         st.markdown(f"""
         ✅ Perfect!
 
@@ -94,16 +143,16 @@ elif st.session_state.role == "employer":
 
         st.markdown("### 🚀 Contact Our Team")
 
-        col1, col2 = st.columns(2)
+        st.markdown('<div class="call-btn">', unsafe_allow_html=True)
+        st.link_button("📞 Call Now", "tel:+385993665624")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with col1:
-            st.link_button("📞 Call Now", "tel:+385993665624")
-
-        with col2:
-            st.link_button(
-                "💬 WhatsApp",
-                f"https://wa.me/385993665624?text=Hi%20I%20need%20{st.session_state.count}%20{st.session_state.job}%20workers"
-            )
+        st.markdown('<div class="whatsapp-btn">', unsafe_allow_html=True)
+        st.link_button(
+            "💬 WhatsApp",
+            f"https://wa.me/385993665624?text=Hi%20I%20need%20{st.session_state.count}%20{st.session_state.job}%20workers"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ======================
 # CANDIDATE FLOW
@@ -112,14 +161,10 @@ elif st.session_state.role == "candidate":
 
     st.success("Selected: Candidate")
 
-    # STEP 1 → Job role
+    # STEP 1
     if st.session_state.step == 1:
-        st.markdown("""
-        👋 Welcome Candidate!
-
-        What job are you looking for?
-        (Example: Driver, Helper, Cleaner)
-        """)
+        st.markdown("👋 Welcome Candidate!")
+        st.markdown("What job are you looking for?")
 
         job = st.text_input("Your answer", key="can_job")
 
@@ -128,8 +173,16 @@ elif st.session_state.role == "candidate":
             st.session_state.step = 2
             st.rerun()
 
-    # STEP 2 → Final
+    # STEP 2 (WITH TYPING EFFECT)
     elif st.session_state.step == 2:
+
+        placeholder = st.empty()
+        placeholder.markdown('<div class="typing">🤖 AI is typing...</div>', unsafe_allow_html=True)
+
+        time.sleep(1.2)
+
+        placeholder.empty()
+
         st.markdown(f"""
         👍 {st.session_state.job.title()} jobs available!
 
@@ -146,28 +199,28 @@ elif st.session_state.role == "candidate":
         • Education Certificate  
         • Experience Certificate  
         • Trade Certificate (added advantage)  
-        • PCC (Police Clearance – depends on country)  
+        • PCC (depends on country)  
         • Medical Certificate (optional)  
 
         ⏳ Visa Processing:
-        30–90 days (depends on country)
+        30–90 days  
         """)
 
         st.markdown("### 🚀 Apply Now")
 
-        col1, col2 = st.columns(2)
+        st.markdown('<div class="call-btn">', unsafe_allow_html=True)
+        st.link_button("📞 Call Now", "tel:+919994562962")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-        with col1:
-            st.link_button("📞 Call Now", "tel:+919994562962")
-
-        with col2:
-            st.link_button(
-                "💬 WhatsApp Apply",
-                f"https://wa.me/919994562962?text=Hi%20I%20want%20to%20apply%20for%20{st.session_state.job}%20job"
-            )
+        st.markdown('<div class="whatsapp-btn">', unsafe_allow_html=True)
+        st.link_button(
+            "💬 WhatsApp Apply",
+            f"https://wa.me/919994562962?text=Hi%20I%20am%20interested%20in%20{st.session_state.job}%20job"
+        )
+        st.markdown('</div>', unsafe_allow_html=True)
 
 # ======================
-# RESET BUTTON
+# RESET
 # ======================
 st.markdown("---")
 
